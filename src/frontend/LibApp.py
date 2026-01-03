@@ -25,7 +25,7 @@ class MainGridContainer(Container):
             yield InputSection(
                 section_title="Второе поле ввода",
                 input_placeholder="Поле для поиска в личной библиотеке...",
-                on_enter_callback=self.app.save_to_file_2,
+                on_enter_callback=self.app.search_personal_library,
                 id="section2"
             )
 
@@ -111,6 +111,55 @@ class LibApp(App):
         if self.has_saved_user():
             self.attempt_auto_login()
 
+    def search_personal_library(self, query: str) -> None:
+        if not query or not self.userid or not self.password:
+            return
+        try:
+            url = f"{self.base_url}/lib"
+            data = {
+                "userid": self.userid,
+                "password": self.password,
+                "query": query
+            }
+
+            response = requests.post(url, json=data)
+            if response.status_code == 200:
+                result = response.json()
+                if result.get('success'):
+                    books_data = result.get('books', [])
+                    self.display_personal_books(books_data)
+        except Exception as e:
+            pass
+
+    def display_personal_books(self, books_data: list) -> None:
+        right_pane = self.query_one("#right-pane", VerticalScroll)
+
+        for container in self.book_containers:
+            container.remove()
+        self.book_containers.clear()
+
+        for book_data in books_data:
+            book = {
+                'title': book_data.get('title', 'Без названия'),
+                'author': book_data.get('author', 'Неизвестен'),
+                'year': book_data.get('first_year_publish', 'Неизвестен'),
+                'cover_i': book_data.get('cover_i', 0),
+                'key': book_data.get('key', ''),
+                'language': book_data.get('language', '')
+            }
+
+            book_container = BookContainer(
+                book,
+                add_to_lib=self.app.add_book_to_library,
+                rem_in_lib=self.app.remove_book_from_library,
+                is_added=True,
+            )
+
+            book_container.set_focus_handler(self.app._on_book_focused)
+            self.app.book_containers.append(book_container)
+            right_pane.mount(book_container)
+
+
     def search_books(self, query: str) -> None:
         if not query:
             return
@@ -127,9 +176,8 @@ class LibApp(App):
                     "api": self.search_api,
                     "query": query,
                     "userid": self.userid,
-                   "password": self.password,
+                    "password": self.password,
                 }
-
 
             response = requests.post(url, json=data)
             if response.status_code == 200:
