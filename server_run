@@ -34,6 +34,7 @@ main() {
     grep -oP "(?<=IPv4Address\": \")[0-9.]*") && 
       cd ${p} && run_server
 }
+sudo docker network rm -f kpo_net
 sudo docker network create \
       -d bridge \
       kpo_net

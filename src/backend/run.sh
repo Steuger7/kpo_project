@@ -1,5 +1,6 @@
 #!/bin/bash
 
+sudo docker rm -f kpo_back &&
 sudo docker build -t back . &&
   sudo docker run --name kpo_back \
     --network=kpo_net \

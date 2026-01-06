@@ -1,4 +1,4 @@
 #!/bin/sh
 
-sudo docker rm -f kpo_back pdb_name
+sudo docker rm -f kpo_back kpo_pdb kpo_front
 sudo docker network rm kpo_net

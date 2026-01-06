@@ -1,0 +1,5 @@
+#!/bin/bash
+
+./stop
+./server_run &&
+./client_run
