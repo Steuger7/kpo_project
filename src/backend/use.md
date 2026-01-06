@@ -20,5 +20,5 @@ POSTGRES_DB="libralib" POSTGRES_USER="postgres" POSTGRES_HOST="localhost" POSTGR
 
 ```bash
 npm run test:unit &&
-npm run test:integration
+PGUSER=postgres PGPASSWORD=a PGHOST=localhost APP_PORT=3030 DB=libralib npm run test:integration
 ```
