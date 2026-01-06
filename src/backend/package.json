@@ -8,7 +8,7 @@
     "start": "node app.js",
     "devstart": "nodemon app.js",
     "test:unit": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
-    "test:integration": "HOST=\"http://localhost:3030/\" node --experimental-vm-modules test/integration/integration_test.js"
+    "test:integration": "test/integration/run_integration_test.sh"
   },
   "keywords": [],
   "author": "",
