@@ -92,19 +92,21 @@ app.post("/lib/addbook", async (req, res, next) => {
       userid,
       password,
       cover_i,
-      first_year_publish,
+      first_publish_year,
       key,
       language,
       title,
+      author_name,
     } = req.body;
     assert(
       userid &&
         password &&
         cover_i &&
-        first_year_publish &&
+        first_publish_year &&
         key &&
         language &&
-        title,
+        title &&
+        author_name,
       "Wrong token in request on lib/addbook/",
     );
 
@@ -112,10 +114,11 @@ app.post("/lib/addbook", async (req, res, next) => {
       userid,
       password,
       cover_i,
-      first_year_publish,
+      first_publish_year,
       key,
       language,
       title,
+      author_name,
     );
     res.json({ success: true });
   };

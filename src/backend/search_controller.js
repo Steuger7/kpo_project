@@ -13,8 +13,26 @@ export class AppController {
     return dbResponse.rows;
   }
 
-  async saveBook(userid, password, cover, fyp, key, lang, title) {
-    await this.db.appendBook(userid, password, cover, fyp, key, lang, title);
+  async saveBook(
+    userid,
+    password,
+    cover,
+    fyp,
+    key,
+    lang,
+    title,
+    first_publish_year,
+  ) {
+    await this.db.appendBook(
+      userid,
+      password,
+      cover,
+      fyp,
+      key,
+      lang,
+      title,
+      first_publish_year,
+    );
   }
 
   async deleteBook(userid, password, key) {

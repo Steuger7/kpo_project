@@ -21,7 +21,7 @@ export class DatabaseController {
       q = search_query + "|" + search_query.replaceAll(" ", "|");
     }
     return await this.db.query(
-      String.raw`select ce.cover_i, ce.first_year_publish, ce.key, ce.language, ce.title from collection_entry ce LEFT JOIN users u ON u.id = ce.collection_id WHERE ce.collection_id=$1 AND u.password=hash_string($2) AND ce.title ~* $3 ORDER BY
+      String.raw`select ce.cover_i, ce.first_publish_year, ce.key, ce.language, ce.title from collection_entry ce LEFT JOIN users u ON u.id = ce.collection_id WHERE ce.collection_id=$1 AND u.password=hash_string($2) AND ce.title ~* $3 ORDER BY
       (CASE
         WHEN title ILIKE $4 THEN 1
         WHEN title ILIKE $4 THEN 2
@@ -33,19 +33,23 @@ export class DatabaseController {
     );
   }
 
-  async appendBook(userid, password, cover_i, fyp, key, lang, title) {
+  async appendBook(
+    userid,
+    password,
+    cover_i,
+    fyp,
+    key,
+    lang,
+    title,
+    first_publish_year,
+  ) {
     const client = await this.db.connect();
     let response;
     try {
-      response = client.query("CALL append_book($1, $2, $3, $4, $5, $6, $7)", [
-        userid,
-        password,
-        cover_i,
-        fyp,
-        key,
-        lang,
-        title,
-      ]);
+      response = client.query(
+        "CALL append_book($1, $2, $3, $4, $5, $6, $7, $8)",
+        [userid, password, cover_i, fyp, key, lang, title, first_publish_year],
+      );
     } finally {
       client.release();
     }
