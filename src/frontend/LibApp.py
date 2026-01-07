@@ -131,8 +131,6 @@ class LibApp(App):
                 result = response.json()
                 if result.get('success'):
                     books_data = result.get('books', [])
-
-                    self._update_library_keys(books_data)
                     self.display_books(books_data)
         except Exception as e:
             pass
