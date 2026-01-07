@@ -57,11 +57,10 @@ class InputSection(Container):
         input_widget = self.query_one("#text-input", Input)
         text = input_widget.value.strip()
 
-        if text:
-            if self.on_enter:
-                try:
-                    self.on_enter(text)
-                    input_widget.value = ""
-                    input_widget.focus()
-                except Exception as e:
-                    pass
+        if self.on_enter:
+            try:
+                self.on_enter(text)
+                input_widget.value = ""
+                input_widget.focus()
+            except Exception as e:
+                pass
