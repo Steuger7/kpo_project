@@ -13,16 +13,7 @@ export class AppController {
     return dbResponse.rows;
   }
 
-  async saveBook(
-    userid,
-    password,
-    cover,
-    fyp,
-    key,
-    lang,
-    title,
-    first_publish_year,
-  ) {
+  async saveBook(userid, password, cover, fyp, key, lang, title, author_name) {
     await this.db.appendBook(
       userid,
       password,
@@ -31,7 +22,7 @@ export class AppController {
       key,
       lang,
       title,
-      first_publish_year,
+      author_name,
     );
   }
 
