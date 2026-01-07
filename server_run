@@ -21,14 +21,11 @@ run_server() {
     -e POSTGRES_HOST=${KPO_POSTGRES_HOST} \
     -e POSTGRES_PORT=${KPO_POSTGRES_PORT} \
     -e APP_PORT=${KPO_APP_PORT} \
-    -d -p 1337:8080 back
+    -d -p 1337:8080 back &&
+  pwd &&
+  bash ./run_tests_in_container.sh
 }
 
-run_server_tests() {
-  cd ./src/backend/
-  bash ./build.sh
-  ./run_tests_in_container.sh
-}
 
 main() {
   KPO_POSTGRES_DB="libralib"
