@@ -8,10 +8,11 @@ CREATE TABLE users (
 CREATE TABLE collection_entry (
   collection_id INTEGER NOT NULL,
   cover_i INTEGER NOT NULL,
-  first_year_publish SMALLINT NOT NULL,
+  first_publish_year SMALLINT NOT NULL,
   key text NOT NULL,
   language CHAR(3)[] NOT NULL,
   title text NOT NULL,
+  author_name TEXT[] NOT NULL,
   UNIQUE (collection_id, key)
 );
 

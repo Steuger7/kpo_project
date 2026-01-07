@@ -140,6 +140,9 @@ app.post("/lib/removebook", async (req, res, next) => {
 });
 
 app.post("/lib", async (req, res, next) => {
+  const removeSpecialChars = (str) => {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, "");
+  };
   const body = async (req, res) => {
     const { userid, password, query } = req.body;
     assert(
@@ -147,7 +150,11 @@ app.post("/lib", async (req, res, next) => {
       "Wrong auth token in request on /lib",
     );
 
-    let response = await appController.getSavedBooks(userid, password, query);
+    let response = await appController.getSavedBooks(
+      userid,
+      password,
+      removeSpecialChars(query),
+    );
     res.json({ books: response, success: response ? true : false });
   };
   await try_catch_next_wrapper(body, req, res, next);
