@@ -85,8 +85,9 @@ describe("DatabaseController", () => {
         456,
         2020,
         "key123",
-        "en",
+        ["en"],
         "Book Title",
+        ["JA manal"],
       );
 
       expect(mockPool.connect).toHaveBeenCalled();
@@ -109,8 +110,9 @@ describe("DatabaseController", () => {
           456,
           2020,
           "key123",
-          "en",
+          ["en"],
           "Title",
+          ["JA manal"],
         ),
       ).rejects.toThrow("Query failed");
       expect(mockClient.release).toHaveBeenCalled();

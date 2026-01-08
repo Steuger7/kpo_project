@@ -47,10 +47,11 @@ response2 = await fetch(host + "lib/addbook", {
     userid: user.userid,
     password: user.password,
     cover_i: 11,
-    first_year_publish: 2004,
+    first_publish_year: 2004,
     key: "/works/OL8065988M",
     language: ["jpn", "krn"],
     title: "the lord of the rings",
+    author_name: ["JA manal"],
   }),
 }).then((response) => {
   return response.json();
@@ -69,10 +70,11 @@ response2 = await fetch(host + "lib/addbook", {
     userid: user.userid,
     password: user.password,
     cover_i: 11,
-    first_year_publish: 2004,
+    first_publish_year: 2004,
     key: "/works/OL8066000M",
     language: ["jpn", "krn"],
     title: "the lord of the rings",
+    author_name: ["JA manal", "da da"],
   }),
 }).then((response) => {
   return response.json();

@@ -65,8 +65,9 @@ describe("AppController", () => {
         456,
         2020,
         "key123",
-        "en",
+        ["en"],
         "Title",
+        ["JA manal"],
       );
       expect(mockDbController.appendBook).toHaveBeenCalledWith(
         123,
@@ -74,8 +75,9 @@ describe("AppController", () => {
         456,
         2020,
         "key123",
-        "en",
+        ["en"],
         "Title",
+        ["JA manal"],
       );
     });
   });
