@@ -70,7 +70,7 @@ class BookContainer(Container):
         yield Container(
             Vertical(
                 Static(self.book['title'], classes="book-title"),
-                Static(f"Автор: {self.book['author']}", classes="book-author"),
+                Static(f"Автор: {', '.join(self.book['author'])}", classes="book-author"),
                 Static(f"Год: {self.book['year']}", classes="book-year"),
                 Static(status_text, classes=status_class, id="book-status_notAdded"),
             ),

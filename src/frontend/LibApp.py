@@ -1,7 +1,7 @@
 import json
 import os
-
 import requests
+
 from textual.app import App, ComposeResult
 from textual.widgets import Input, Static
 from textual.containers import Vertical, Container, VerticalScroll
@@ -25,7 +25,7 @@ class MainGridContainer(Container):
             yield InputSection(
                 section_title="Второе поле ввода",
                 input_placeholder="Поле для поиска в личной библиотеке...",
-                on_enter_callback=self.app.save_to_file_2,
+                on_enter_callback=self.app.search_personal_library,
                 id="section2"
             )
 
@@ -74,6 +74,7 @@ class LibApp(App):
         self.last_focused_book = None
         self.book_containers = []
         self.main_container = None
+        self.library_keys = {}
 
         self.auto_login_attempted = False
         self.config_file = "user_config.json"
@@ -97,6 +98,9 @@ class LibApp(App):
 
     def _on_login_close(self) -> None:
         self.showMainContainer()
+        if self.current_user != "Гость":
+            self._update_library_keys_full()
+            self.update_user_info_display()
 
     def compose(self) -> ComposeResult:
         self.main_container = MainGridContainer(id="main-grid-container")
@@ -111,31 +115,35 @@ class LibApp(App):
         if self.has_saved_user():
             self.attempt_auto_login()
 
-    def search_books(self, query: str) -> None:
-        if not query:
+    def search_personal_library(self, query: str) -> None:
+        if not self.userid or not self.password:
             return
-
         try:
-            url = f"{self.base_url}/search"
+            url = f"{self.base_url}/lib"
             data = {
-                "api": self.search_api,
-                "query": query,
+                "userid": self.userid,
+                "password": self.password,
+                "query": query
             }
-
-            if self.userid:
-                data = {
-                    "api": self.search_api,
-                    "query": query,
-                    "userid": self.userid,
-                   "password": self.password,
-                }
-
 
             response = requests.post(url, json=data)
             if response.status_code == 200:
                 result = response.json()
                 if result.get('success'):
-                    self.display_books(result['api_response']['docs'])
+                    books_data = result.get('books', [])
+                    self.display_books(books_data)
+        except Exception as e:
+            pass
+
+    def search_books(self, query: str) -> None:
+        if not query:
+            return
+
+        try:
+            response = requests.get(self.search_api + "?q=" + query.strip().replace(" ", "+"))
+            if response.status_code == 200:
+                result = response.json()
+                self.display_books(result['docs'])
         except Exception as e:
             pass
 
@@ -149,7 +157,7 @@ class LibApp(App):
         for book_data in books_data:
             book = {
                 'title': book_data.get('title', 'Без названия'),
-                'author': ', '.join(book_data.get('author_name', ['Неизвестен'])),
+                'author': book_data.get('author_name', ['Неизвестен']),
                 'year': book_data.get('first_publish_year', 'Неизвестен'),
                 'cover_i': book_data.get('cover_i', 0),
                 'key': book_data.get('key', ''),
@@ -160,12 +168,45 @@ class LibApp(App):
                 book,
                 add_to_lib=self.app.add_book_to_library,
                 rem_in_lib=self.app.remove_book_from_library,
-                is_added=book_data.get('present', False),
+                is_added=self.is_book_in_library(book),
             )
 
             book_container.set_focus_handler(self.app._on_book_focused)
             self.app.book_containers.append(book_container)
             right_pane.mount(book_container)
+
+    def is_book_in_library(self, book) -> bool:
+        return book.get("key") in self.library_keys
+
+    def _update_library_keys_full(self) -> None:
+        try:
+            url = f"{self.base_url}/lib"
+            data = {
+                "userid": self.userid,
+                "password": self.password,
+                "query": ""
+            }
+
+            response = requests.post(url, json=data)
+            if response.status_code == 200:
+                result = response.json()
+                if result.get('success'):
+                    books_data = result.get('books', [])
+                    self._update_library_keys(books_data)
+            self.update_user_info_display()
+        except Exception as e:
+            pass
+
+    def _update_library_keys(self, books_data: list) -> None:
+        self.library_keys.clear()
+
+        for book in books_data:
+            book_key = book.get('key')
+            if book_key:
+                self.library_keys[book_key] = True
+
+        self.user_books_count = len(self.library_keys)
+        self.update_user_info_display()
 
 
     def _handle_login_backend(self, username: str, password: str) -> bool:
@@ -259,9 +300,9 @@ class LibApp(App):
         if success:
             self.curremr_user = username
             self.password = saved_password
-            self.update_user_info_display()
+            self._update_library_keys_full()
         self.showMainContainer()
-
+        self.update_user_info_display()
 
 
     def _on_book_focused(self, book_container: BookContainer) -> None:
@@ -339,25 +380,6 @@ class LibApp(App):
             right_pane.styles.column_span = 1
             right_pane.styles.row_span = 2
 
-    def save_to_file_1(self, text: str) -> None:
-        filename = "saved_text_1.txt"
-        self._save_to_file(filename, text, 1)
-
-    def save_to_file_2(self, text: str) -> None:
-        filename = "saved_text_2.txt"
-        self._save_to_file(filename, text, 2)
-
-    def _save_to_file(self, filename: str, text: str, section_num: int) -> None:
-        try:
-            with open(filename, "a", encoding="utf-8") as file:
-                from datetime import datetime
-                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                file.write(f"[{timestamp}] {text}\n")
-
-        except Exception as e:
-            raise
-
-
     def update_user_info_display(self) -> None:
         try:
             user_info_container = self.query_one("#user-info", UserInfoContainer)
@@ -390,7 +412,6 @@ class LibApp(App):
         self.update_user_info_display()
 
 
-
     def add_book_to_library(self, book: dict) -> bool:
         if not self.userid or not self.password:
             return False
@@ -401,10 +422,11 @@ class LibApp(App):
                 "userid": self.userid,
                 "password": self.password,
                 "cover_i": book.get('cover_i', 0),
-                "first_year_publish": book.get('year', 0),
+                "first_publish_year": book.get('year', 0),
                 "key": book.get('key', ''),
                 "language": book.get('language', 'ru'),
-                "title": book.get('title', '')
+                "title": book.get('title', ''),
+                "author_name": book.get('author', ['Неизвестен'])
             }
 
             response = requests.post(url, json=data, timeout=10)
@@ -414,7 +436,7 @@ class LibApp(App):
                 success = result.get('success', False)
 
                 if success:
-                    self.update_books_count()
+                    self._update_library_keys_full()
                     self.update_user_info_display()
                     return True
                 else:
@@ -439,7 +461,7 @@ class LibApp(App):
                 result = response.json()
                 success = result.get('success', False)
                 if success:
-                    self.update_books_count()
+                    self._update_library_keys_full()
                     self.update_user_info_display()
                     return True
                 else:
@@ -449,27 +471,6 @@ class LibApp(App):
 
         except Exception as e:
             return False
-
-    def update_books_count(self) -> None:
-        if not self.userid or not self.password:
-            return
-
-        try:
-            url = f"{self.base_url}/lib"
-            data = {
-                "userid": self.userid,
-                "password": self.password
-            }
-            response = requests.post(url, json=data, timeout=5)
-            if response.status_code == 200:
-                result = response.json()
-                if result.get('success'):
-                    books = result.get('books', [])
-                    self.user_books_count = len(books)
-                    self.update_user_info_display()
-
-        except Exception as e:
-            pass
 
 
     def hideMainContainer(self):

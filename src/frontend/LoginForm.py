@@ -165,24 +165,3 @@ class LoginForm(Container):
         if parent and isinstance(parent, ScreenPop):
             parent.pop()
 
-
-class LoginSuccess(events.Event):
-
-    def __init__(self, username: str):
-        super().__init__()
-        self.username = username
-
-
-class LoginApp(App):
-    def compose(self) -> ComposeResult:
-        yield Header()
-        yield LoginForm()
-        yield Footer()
-
-    def on_login_success(self, event: LoginSuccess) -> None:
-        self.notify(f"Добро пожаловать, {event.username}!")
-
-
-if __name__ == "__main__":
-    app = LoginApp()
-    app.run()
