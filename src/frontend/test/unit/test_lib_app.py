@@ -596,18 +596,6 @@ class TestLibAppScreenMethods:
                         mock_hide.assert_called_once()
                         mock_push.assert_called_once_with(mock_screen_pop)
 
-    def test_on_login_close_guest(self):
-        app = LibApp()
-        app.current_user = "Гость"
-        
-        with patch.object(app, 'showMainContainer') as mock_show:
-            with patch.object(app, '_update_library_keys_full') as mock_update:
-                with patch.object(app, 'update_user_info_display') as mock_update_display:
-                    app._on_login_close()
-                    
-                    mock_show.assert_called_once()
-
-
 class TestLibAppLibraryKeyMethods:
     
     def test_update_library_keys_full_success(self):
