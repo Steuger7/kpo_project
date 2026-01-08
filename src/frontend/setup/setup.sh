@@ -2,9 +2,11 @@
 
 echo "Установка зависимостей для LibApp..."
 
+venv_name="venv"
 setup_dir=$(dirname $0)
-. ${setup_dir}/../venv/bin/activate
-pip3 install textual
+python3 -m venv ${setup_dir}/../${venv_name}
+. ${setup_dir}/../${venv_name}/bin/activate
+pip3 install textual requests
 
 echo "Установка завершена"
 
