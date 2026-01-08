@@ -43,6 +43,8 @@ class UserInfoContainer(Container):
         color: white;
         align: center middle;
         content-align: center middle;
+        margin: 0;
+        padding: 0;
     }
     """
 
