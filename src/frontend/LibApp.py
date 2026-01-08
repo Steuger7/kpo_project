@@ -106,6 +106,7 @@ class LibApp(App):
             self.update_input_container_visibility()
             self._update_library_keys_full()
             self.update_user_info_display()
+        self.display_books([])
 
     def compose(self) -> ComposeResult:
         self.main_container = MainGridContainer(id="main-grid-container")
@@ -143,8 +144,11 @@ class LibApp(App):
     def search_books(self, query: str) -> None:
         if not query:
             return
-
         try:
+            if self.current_user != "Гость":
+                self._update_library_keys_full()
+            else:
+                library_keys = {}
             response = requests.get(self.search_api + "?q=" + query.strip().replace(" ", "+"))
             if response.status_code == 200:
                 result = response.json()
@@ -154,7 +158,7 @@ class LibApp(App):
 
     def display_books(self, books_data: list) -> None:
         right_pane = self.query_one("#right-pane", VerticalScroll)
-
+        
         for container in self.book_containers:
             container.remove()
         self.book_containers.clear()
@@ -311,6 +315,7 @@ class LibApp(App):
             self.update_input_container_visibility()
         self.showMainContainer()
         self.update_user_info_display()
+        self.display_books([])
 
 
     def _on_book_focused(self, book_container: BookContainer) -> None:
@@ -407,6 +412,7 @@ class LibApp(App):
         self.user_books_count = 0
         self.userid = None
         self.password = None
+        self.display_books([])
         self.update_input_container_visibility()
         self.update_user_info_display()
 

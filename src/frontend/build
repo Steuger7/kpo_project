@@ -1,0 +1,4 @@
+#!/bin/bash
+
+sudo docker rm -f kpo_front &&
+sudo docker build -t front .

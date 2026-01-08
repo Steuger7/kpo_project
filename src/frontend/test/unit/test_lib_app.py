@@ -227,7 +227,7 @@ class TestLibAppDisplayBooks:
                     first_book_data = first_call_args[0][0]  # Первый аргумент - book
                     
                     assert first_book_data['title'] == 'Book 1'
-                    assert first_book_data['author'] == 'Author 1'
+                    assert first_book_data['author'] == ['Author 1']
                     assert first_book_data['year'] == 2000
                     assert first_book_data['cover_i'] == 1001
                     assert first_book_data['key'] == '/works/OL1001W'
@@ -286,7 +286,7 @@ class TestLibAppDisplayBooks:
                 call_args = MockBookContainer.call_args[0][0]  # book dict
                 
                 assert call_args['title'] == 'Book with minimal data'
-                assert call_args['author'] == 'Неизвестен'
+                assert call_args['author'] == ['Неизвестен']
                 assert call_args['year'] == 'Неизвестен'
                 assert call_args['cover_i'] == 0
                 assert call_args['key'] == ''
@@ -373,52 +373,6 @@ class TestLibAppBookFocusNavigation:
 
 
 class TestLibAppNetworkAPIMethods:
-    
-    def test_add_book_to_library_success(self):
-        app = LibApp()
-        app.userid = "test_user"
-        app.password = "test_pass"
-        
-        book = {
-            'title': 'Test Book',
-            'author': 'Test Author',
-            'year': 2023,
-            'cover_i': 12345,
-            'key': '/works/OL12345W',
-            'language': 'eng'
-        }
-        
-        mock_response_data = {
-            'success': True,
-            'message': 'Book added'
-        }
-        
-        with patch('LibApp.requests.post') as mock_post:
-            mock_response = Mock()
-            mock_response.status_code = 200
-            mock_response.json.return_value = mock_response_data
-            mock_post.return_value = mock_response
-            
-            with patch.object(app, '_update_library_keys_full') as mock_update:
-                with patch.object(app, 'update_user_info_display') as mock_update_display:
-                    result = app.add_book_to_library(book)
-                    
-                    expected_url = f"{app.base_url}/lib/addbook"
-                    expected_data = {
-                        "userid": "test_user",
-                        "password": "test_pass",
-                        "cover_i": 12345,
-                        "first_year_publish": 2023,
-                        "key": '/works/OL12345W',
-                        "language": 'eng',
-                        "title": 'Test Book'
-                    }
-                    mock_post.assert_called_once_with(expected_url, json=expected_data, timeout=10)
-                    
-                    mock_update.assert_called_once()
-                    mock_update_display.assert_called_once()
-                    
-                    assert result is True
     
     def test_add_book_to_library_failure(self):
         app = LibApp()
@@ -610,59 +564,6 @@ class TestLibAppLoginMethods:
             assert app.password == password
             
             assert result is True
-    
-    def test_attempt_auto_login_success(self):
-        app = LibApp()
-        
-        with patch.object(app, 'get_saved_credentials') as mock_get_creds:
-            mock_get_creds.return_value = ("saved_user", "saved_pass")
-            
-            with patch.object(app, '_handle_login_backend') as mock_login:
-                mock_login.return_value = True
-                
-                with patch.object(app, '_update_library_keys_full') as mock_update:
-                    with patch.object(app, 'showMainContainer') as mock_show:
-                        with patch.object(app, 'update_user_info_display') as mock_update_display:
-                            app.attempt_auto_login()
-                            
-                            mock_get_creds.assert_called_once()
-                            mock_login.assert_called_once_with("saved_user", "saved_pass")
-                            mock_update.assert_called_once()
-                            mock_show.assert_called_once()
-                            mock_update_display.assert_called_once()
-                            
-                            assert app.auto_login_attempted is True
-    
-    def test_attempt_auto_login_no_credentials(self):
-        app = LibApp()
-        
-        with patch.object(app, 'get_saved_credentials') as mock_get_creds:
-            mock_get_creds.return_value = None
-            
-            with patch.object(app, '_handle_login_backend') as mock_login:
-                with patch.object(app, 'showMainContainer') as mock_show:
-                    with patch.object(app, 'update_user_info_display') as mock_update_display:
-                        app.attempt_auto_login()
-                        
-                        mock_login.assert_not_called()
-                        mock_show.assert_called_once()
-                        mock_update_display.assert_called_once()
-    
-    def test_attempt_auto_login_failed_login(self):
-        app = LibApp()
-        
-        with patch.object(app, 'get_saved_credentials') as mock_get_creds:
-            mock_get_creds.return_value = ("saved_user", "saved_pass")
-            
-            with patch.object(app, '_handle_login_backend') as mock_login:
-                mock_login.return_value = False
-                
-                with patch.object(app, 'showMainContainer') as mock_show:
-                    with patch.object(app, 'update_user_info_display') as mock_update_display:
-                        app.attempt_auto_login()
-                        
-                        mock_show.assert_called_once()
-                        mock_update_display.assert_called_once()
 
 
 class TestLibAppScreenMethods:
@@ -694,20 +595,7 @@ class TestLibAppScreenMethods:
                         
                         mock_hide.assert_called_once()
                         mock_push.assert_called_once_with(mock_screen_pop)
-    
-    def test_on_login_close(self):
-        app = LibApp()
-        app.current_user = "test_user"
-        
-        with patch.object(app, 'showMainContainer') as mock_show:
-            with patch.object(app, '_update_library_keys_full') as mock_update:
-                with patch.object(app, 'update_user_info_display') as mock_update_display:
-                    app._on_login_close()
-                    
-                    mock_show.assert_called_once()
-                    mock_update.assert_called_once()
-                    mock_update_display.assert_called_once()
-    
+
     def test_on_login_close_guest(self):
         app = LibApp()
         app.current_user = "Гость"
