@@ -1,0 +1,22 @@
+#!/bin/bash
+
+build_db() {
+  cd ./src/db &&
+  bash ./build.sh
+  cd ../..
+}
+
+build_backend() {
+  cd ./src/backend/ &&
+  bash ./build.sh
+  cd ../..
+}
+
+./stop
+sudo docker network rm -f kpo_net
+sudo docker network create \
+  -d bridge \
+  kpo_net
+
+build_db &&
+  build_backend
