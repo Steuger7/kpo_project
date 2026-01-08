@@ -12,6 +12,12 @@ build_backend() {
   cd ../..
 }
 
+build_front() {
+  cd ./src/frontend/ &&
+    bash ./build
+  cd ../..
+}
+
 ./stop
 sudo docker network rm -f kpo_net
 sudo docker network create \
@@ -19,4 +25,5 @@ sudo docker network create \
   kpo_net
 
 build_db &&
-  build_backend
+  build_backend &&
+  build_front
