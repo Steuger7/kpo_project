@@ -1,8 +1,6 @@
 #!/bin/sh
 
 run_database() {
-  cd ./src/db &&
-  bash ./build.sh &&
   sudo docker run \
   --name kpo_pdb \
   --network kpo_net \
@@ -11,10 +9,7 @@ run_database() {
 }
 
 run_server() {
-  cd ./src/backend
   local integration="http://localhost:${KPO_APP_PORT}/"
-
-  bash ./build.sh &&
   sudo docker run --name kpo_back \
     --network=kpo_net \
     -e POSTGRES_PASSWORD=${KPO_POSTGRES_PASSWORD} \
@@ -24,8 +19,7 @@ run_server() {
     -e POSTGRES_PORT=${KPO_POSTGRES_PORT} \
     -e APP_PORT=${KPO_APP_PORT} \
     -e HOST=${integration} \
-    -d -p 1337:8080 back &&
-  bash ./run_tests_in_container.sh
+    -d -p ${KPO_APP_PORT}:8080 back
 }
 
 
@@ -39,14 +33,9 @@ main() {
   local p=$(pwd)
   run_database &&
     KPO_POSTGRES_HOST=$(sudo docker network inspect kpo_net |
-    grep -oP "(?<=IPv4Address\": \")[0-9.]*") && 
+    grep -oP "(?<=IPv4Address\": \")[0-9.]*") &&
     cd ${p} && run_server
   }
-./stop
-sudo docker network rm -f kpo_net
-sudo docker network create \
-  -d bridge \
-  kpo_net
 main
 unset run_database
 unset run_server
