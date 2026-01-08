@@ -19,6 +19,7 @@ class UserInfoContainer(Container):
         grid-size: 3 1;
         grid-columns: 3fr 2fr 1fr;
         align: center middle;
+        content-align: center middle;
     }
 
     .username {
@@ -38,13 +39,12 @@ class UserInfoContainer(Container):
 
     .logout-button {
         width: auto;
+        height: auto;
         min-width: 8;
-        background: $success;
+        background: $error;
         color: white;
         align: center middle;
         content-align: center middle;
-        margin: 0;
-        padding: 0;
     }
     """
 
