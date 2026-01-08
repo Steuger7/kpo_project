@@ -24,7 +24,7 @@ run_server() {
     -e POSTGRES_PORT=${KPO_POSTGRES_PORT} \
     -e APP_PORT=${KPO_APP_PORT} \
     -e HOST=${integration} \
-    -d -p 1337:8080 back &&
+    -d -p ${KPO_APP_PORT}:8080 back &&
   bash ./run_tests_in_container.sh
 }
 
