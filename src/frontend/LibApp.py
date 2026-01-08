@@ -157,7 +157,7 @@ class LibApp(App):
         for book_data in books_data:
             book = {
                 'title': book_data.get('title', 'Без названия'),
-                'author': ', '.join(book_data.get('author_name', ['Неизвестен'])),
+                'author': book_data.get('author_name', ['Неизвестен']),
                 'year': book_data.get('first_publish_year', 'Неизвестен'),
                 'cover_i': book_data.get('cover_i', 0),
                 'key': book_data.get('key', ''),
@@ -199,12 +199,12 @@ class LibApp(App):
 
     def _update_library_keys(self, books_data: list) -> None:
         self.library_keys.clear()
-        
+
         for book in books_data:
             book_key = book.get('key')
             if book_key:
                 self.library_keys[book_key] = True
-        
+
         self.user_books_count = len(self.library_keys)
         self.update_user_info_display()
 
@@ -422,10 +422,11 @@ class LibApp(App):
                 "userid": self.userid,
                 "password": self.password,
                 "cover_i": book.get('cover_i', 0),
-                "first_year_publish": book.get('year', 0),
+                "first_publish_year": book.get('year', 0),
                 "key": book.get('key', ''),
                 "language": book.get('language', 'ru'),
-                "title": book.get('title', '')
+                "title": book.get('title', ''),
+                "author_name": book.get('author', ['Неизвестен'])
             }
 
             response = requests.post(url, json=data, timeout=10)
