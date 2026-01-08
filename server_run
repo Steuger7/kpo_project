@@ -1,43 +1,52 @@
 #!/bin/sh
 
-#sudo docker compose up
-
 run_database() {
   cd ./src/db &&
-
-  KPO_POSTGRES_DB="${db}" \
-  KPO_POSTGRES_USER="${user}" \
-  KPO_POSTGRES_HOST="${host}" \
-  KPO_POSTGRES_PASSWORD="${password}" \
-  KPO_POSTGRES_PORT="${port}" bash ./run.sh
+  bash ./build.sh &&
+  sudo docker run \
+  --name kpo_pdb \
+  --network kpo_net \
+  -e POSTGRES_PASSWORD=${KPO_POSTGRES_PASSWORD} \
+  -d -p 5432:5432 pdb
 }
 
 run_server() {
   cd ./src/backend
+  local integration="http://localhost:${KPO_APP_PORT}/"
 
-  KPO_POSTGRES_DB="${db}" \
-  KPO_POSTGRES_USER="${user}" \
-  KPO_POSTGRES_HOST="${host}" \
-  KPO_POSTGRES_PASSWORD="${password}" \
-  KPO_POSTGRES_PORT="${port}" bash ./run.sh
+  bash ./build.sh &&
+  sudo docker run --name kpo_back \
+    --network=kpo_net \
+    -e POSTGRES_PASSWORD=${KPO_POSTGRES_PASSWORD} \
+    -e POSTGRES_DB=${KPO_POSTGRES_DB} \
+    -e POSTGRES_USER=${KPO_POSTGRES_USER} \
+    -e POSTGRES_HOST=${KPO_POSTGRES_HOST} \
+    -e POSTGRES_PORT=${KPO_POSTGRES_PORT} \
+    -e APP_PORT=${KPO_APP_PORT} \
+    -e HOST=${integration} \
+    -d -p 1337:8080 back &&
+  bash ./run_tests_in_container.sh
 }
 
+
 main() {
-  local db="libralib"
-  local user="postgres"
-  local password="docker"
-  local port="5432"
+  KPO_POSTGRES_DB="libralib"
+  KPO_POSTGRES_USER="postgres"
+  KPO_POSTGRES_PASSWORD="docker"
+  KPO_POSTGRES_PORT="5432"
+  KPO_APP_PORT="3030"
 
   local p=$(pwd)
   run_database &&
-  local host=$(sudo docker network inspect kpo_net |
+    KPO_POSTGRES_HOST=$(sudo docker network inspect kpo_net |
     grep -oP "(?<=IPv4Address\": \")[0-9.]*") && 
-      cd ${p} && run_server
-}
+    cd ${p} && run_server
+  }
+./stop
 sudo docker network rm -f kpo_net
 sudo docker network create \
-      -d bridge \
-      kpo_net
+  -d bridge \
+  kpo_net
 main
 unset run_database
 unset run_server
