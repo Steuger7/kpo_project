@@ -2,20 +2,16 @@
 
 echo "Установка зависимостей для LibApp..."
 
-pip3 install textual
+pip install textual
+pip install python-dotenv
+pip install requests
 
 echo "Установка завершена"
-
-
-echo "Запуск LibApp.py"
-
-cd ..
-python3 LibApp.py
 
 echo ""
 echo "/////////////////////////////"
 echo ""
-echo "Для запуска используйте следующую команду в frontend (cd ..):"
+echo "Для запуска используйте следующую команду в frontend:"
 echo "python3 LibApp.py"
 echo ""
 echo "/////////////////////////////"

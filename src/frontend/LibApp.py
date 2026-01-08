@@ -6,6 +6,8 @@ from textual.app import App, ComposeResult
 from textual.widgets import Input, Static
 from textual.containers import Vertical, Container, VerticalScroll
 from textual.binding import Binding
+from dotenv import load_dotenv
+
 from inputSection import InputSection
 from booksContainer import BookContainer
 from userContainer import UserInfoContainer
@@ -79,7 +81,8 @@ class LibApp(App):
         self.auto_login_attempted = False
         self.config_file = "user_config.json"
 
-        self.base_url = "http://localhost:8080"
+        load_dotenv()
+        self.base_url = f"http://{os.environ.get('APP_HOST')}:{os.environ.get('APP_PORT')}"
         self.search_api = "http://openlibrary.org/search.json"
 
     def show_login_screen(self) -> None:
